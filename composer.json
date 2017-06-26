@@ -1,0 +1,25 @@
+{
+  "name": "patrickschur/words2regex",
+  "type": "library",
+  "description": "Build your regular expressions based on your texts.",
+  "keywords": ["regex", "regexp", "builder", "regex-builder"],
+  "homepage": "https://github.com/patrickschur/words2regex",
+  "license": "MIT",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "authors": [
+    {
+      "name": "Patrick Schur",
+      "email": "patrick_schur@outlook.de"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Words2Regex\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^7",
+    "ext-mbstring": "*"
+  }
+}
