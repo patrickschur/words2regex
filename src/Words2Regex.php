@@ -33,7 +33,7 @@ class Words2Regex
 
         foreach ($this->ast as $char => $ast)
         {
-            $regex[] = $char . $ast->getRegex();
+            $regex[] = preg_quote($char, '/') . $ast->getRegex();
         }
 
         if (empty($regex))
