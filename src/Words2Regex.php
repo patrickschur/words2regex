@@ -84,8 +84,6 @@ class Words2Regex
             }
         }
 
-        $result = implode('|', $regex);
-
-        return ((count($regex) > 1) ? '(' . $result . ')' : $result) . $optional;
+        return '(' . implode('|', $regex) . ')' . $optional;
     }
 }
