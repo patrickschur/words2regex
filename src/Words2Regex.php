@@ -4,36 +4,37 @@ namespace Words2Regex;
 
 class Words2Regex
 {
-    protected $endOfString = false;
+    /** @var bool */
+    protected $terminated = false;
 
     /** @var Words2Regex[] */
-    protected $ast = [];
+    protected $trie = [];
 
     public function add($word)
     {
-        if (empty($word))
+        if ('' === $word)
         {
-            $this->endOfString = true;
+            $this->terminated = true;
             return;
         }
 
         $char = mb_substr($word, 0, 1);
 
-        if (!isset($this->ast[$char]))
+        if (!isset($this->trie[$char]))
         {
-            $this->ast[$char] = new Words2Regex();
+            $this->trie[$char] = new Words2Regex();
         }
 
-        $this->ast[$char]->add(mb_substr($word, 1));
+        $this->trie[$char]->add(mb_substr($word, 1));
     }
 
-    public function getRegex()
+    public function getRegex($delimiter = '/')
     {
         $regex = [];
 
-        foreach ($this->ast as $char => $ast)
+        foreach ($this->trie as $char => $node)
         {
-            $regex[] = preg_quote($char, '/') . $ast->getRegex();
+            $regex[] = preg_quote($char, $delimiter) . $node->getRegex();
         }
 
         if (empty($regex))
@@ -41,16 +42,16 @@ class Words2Regex
             return '';
         }
 
-        if (!$this->endOfString && count($regex) == 1)
+        if (!$this->terminated && count($regex) === 1)
         {
             return $regex[0];
         }
 
-        $optional = $this->endOfString ? '?' : '';
+        $optional = $this->terminated ? '?' : '';
 
-        if (mb_strlen(implode('', $regex)) == count($regex))
+        if (mb_strlen(implode('', $regex)) === count($regex))
         {
-            if (count($regex) == 1)
+            if (count($regex) === 1)
             {
                 return implode('', $regex) . $optional;
             }
@@ -60,7 +61,7 @@ class Words2Regex
 
         foreach ($regex as $i => $curVal)
         {
-            $begin = mb_substr($curVal, 0, 1);
+            $begin = [mb_substr($curVal, 0, 1)];
             $end = mb_substr($curVal, 1);
 
             foreach ($regex as $j => $nextVal)
@@ -72,17 +73,19 @@ class Words2Regex
 
                 if ($end == mb_substr($nextVal, 1))
                 {
-                    $begin .= mb_substr($nextVal, 0, 1);
+                    $begin[] = mb_substr($nextVal, 0, 1);
                     unset($regex[$j]);
                 }
             }
 
-            if (mb_strlen($begin) > 1)
+            if (count($begin) > 1)
             {
-                $regex[$i] = '[' . $begin . ']' . $end;
+                $regex[$i] = '[' . implode('', $begin) . ']' . $end;
             }
         }
 
-        return '(' . implode('|', $regex) . ')' . $optional;
+        $result = implode('|', $regex);
+
+        return ((count($regex) > 1) ? '(' . $result . ')' : $result) . $optional;
     }
 }
